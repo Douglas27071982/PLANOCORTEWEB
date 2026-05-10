@@ -92,3 +92,10 @@ app.MapControllerRoute(
 app.Run();
 
 //dotnet publish -c Release -o ./publish
+
+
+
+
+
+
+
