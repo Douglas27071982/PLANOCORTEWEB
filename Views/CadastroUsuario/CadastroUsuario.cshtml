@@ -1,0 +1,380 @@
+﻿@{
+    ViewData["Nome"] = "";
+
+
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .douglas {
+        background-color: #ffffff;
+    }
+
+    .douglas1 {
+        background-color: #15283C;
+    }
+
+    .pequeno {
+        width: 13.8%;
+    }
+
+    .medio {
+        width: 50%;
+    }
+</style>
+
+<div class="card shadow mb-4 ">
+    <div class="card-header py-3 douglas">
+        <h5 class="m-0 font-weight-bold text-black-50" style="color:#7F7F7F">Cadastro de Usuarios</h5>
+    </div>
+    <div id="idOra">
+    </div>
+    <div class="card-body">
+
+
+        <div class="btn-group container">
+
+            <button class="btn btn-success  pequeno " type="button" style="border-radius: .40rem" onclick="abrirModal(null)">Criar Novo Usuario</button>
+           
+        </div>
+
+        <hr />
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered table-striped" id="tbdata" style="width:100%" cellspacing="0">
+                        <thead>
+                            <tr>
+                                <th>Id Usuario</th>
+                                <th>Nome</th>
+                                <th>Senha</th>
+                                <th>Tipo</th>
+                                <th>Excluir</th>
+                            </tr>
+                        </thead>
+
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    
+
+
+</div>
+<div class="modal fade" id="FormModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header douglas1 text-white">
+                <h5 class="modal-title" id="exampleModalLabel">Cadastro de Usuarios</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input id="txtid" type="hidden" value="0" />
+                <form id="formNivel">
+
+
+
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="txtUsuario">Nome:</label>
+                                <input type="text" class="form-control required" id="txtUsuario" name="Descrição" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="txtSenha">Senha:</label>
+                                <input type="password" class="form-control required" id="txtSenha" name="Setor" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label for="txtTipo">Tipo Usuario:</label>
+                                <select class="form-control" id="txtTipo">
+                                    <option value="Admin">Admin</option>
+                                    <option value="User">User</option>
+                                    
+                                </select>
+
+                            </div>
+                        </div>
+                    </div>
+
+
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger col-sm-2" data-dismiss="modal">Sair</button>
+                <button id="btnsalvar" type="button" class="btn btn-primary col-sm-2">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts
+    {
+
+    <!-- ============================================================
+    =LIBRERIAS PARA USO DE DATATABLES JS
+    ===============================================================-->
+    <script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+    <!-- ============================================================
+    =HEADER
+    ===============================================================-->
+    <script src="https://cdn.datatables.net/fixedheader/3.2.2/js/dataTables.fixedHeader.min.js"></script>
+
+
+    <!-- ============================================================
+    =LIBRERIAS PARA EXPORTAR A ARCHIVOS
+    ===============================================================-->
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
+
+
+
+
+    <script>
+
+        var operacion = "";
+        var tabla;
+
+        //função para carregar tabela Com os Usuarios cadastrados
+        $(document).ready(function () {
+            tabla = $("#tbdata").DataTable({
+                responsive: true,
+                "ajax": {
+                    "url": '@Url.Action("ListaUsuarios", "CadastroUsuario")',
+                    "type": "Get",
+                    "datatype": "json"
+
+                },
+
+                "columns": [
+
+                    { "data": "idUsuario" },
+                    { "data": "nome", "width": "500px" },
+                    { "data": "senha" },
+                    { "data": "tipo", "width": "400px" },
+
+
+
+
+
+
+
+                    {
+                        "data": "idUsuario", "render": function (data, type, row, meta) {
+
+                            return $("<button>").addClass("btn btn-danger btn-eliminar btn-sm ml-2").append(
+                                $("<i>").addClass("fa fa-trash white_color")
+                            ).attr({ "data-informacion": JSON.stringify(row) })[0].outerHTML
+                                
+
+
+                        },
+                        "orderable": false,
+                        "searchable": false,
+                        "width": "120px"
+                    }
+                ],
+                initComplete: function () {
+                    var api = this.api();
+
+                    //Para cada coluna
+                    api.columns().eq(0).each(function (colIdx) {
+                        // Defina a célula de cabeçalho para conter o elemento de entrada
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+
+                        //especificar que columna deve mostrar em cada filtro
+                        if ($(api.column(colIdx).header()).index() >= 0 && $(api.column(colIdx).header()).index() != 1) {
+                            $(cell).html('<input type="text" placeholder="buscar..."/>');
+                        }
+
+                        // Em cada pressionamento de tecla nesta entrada
+                        $('input', $('.filters th').eq($(api.column(colIdx).header()).index())).off('keyup change').on('keyup change', function (e) {
+
+                            e.stopPropagation();
+
+                            // Obtenha o valor da pesquisa
+                            $(this).attr('title', $(this).val());
+                            var regexr = '({search})'; //$(this).parents('th').find('select').val();
+
+                            var cursorPosition = this.selectionStart;
+                            // Pesquise na coluna esse valor
+                            api.column(colIdx).search(
+                                this.value != '' ? regexr.replace('{search}', '(((' + this.value + ')))') : '',
+                                this.value != '',
+                                this.value == ''
+                            ).draw();
+
+                            $(this).focus()[0].setSelectionRange(cursorPosition, cursorPosition);
+                        });
+                    });
+                },
+
+                language: {
+                    url: "//cdn.datatables.net/plug-ins/1.11.5/i18n/pt-BR.json"
+                },
+
+            })
+
+        })
+
+        //função para abrir a janela para editar ou adcionar turnos
+
+        function abrirModal(json) {
+            operacion = "crear";
+
+
+            $("#txtUsuario").val("");
+            $("#txtSenha").val("");
+            $("#txtTipo").val("");
+           
+
+
+
+
+            $('#FormModal').modal('show');
+        }
+
+
+        //função para adcionar turnos ao clicar no botão salvar
+
+        $("#btnsalvar").on("click", function () {
+
+            var request_body = {
+                IdUsuario: $("#txtid").val(),
+                Nome: $("#txtUsuario").val(),
+                Senha: $("#txtSenha").val(),
+                Tipo: $("#txtTipo").val()
+
+
+
+            };
+
+
+            jQuery.ajax({
+                url: '@Url.Action("CadastrarUsuario", "CadastroUsuario")',
+                type: "POST",
+                headers: {
+                    operacion: operacion
+                },
+                data: JSON.stringify(request_body),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (data) {
+                    console.log(data)
+
+                    if (data.respuesta) {
+                        tabla.ajax.reload();
+                        Swal.fire({
+                            title: 'Cadastro Efetuado',
+                            text: 'Salvando...',
+                            icon: 'success',
+                            timer: 1500,
+                            buttons: false,
+                        })
+
+                        $("#FormModal").modal("hide");
+
+
+                    }
+                    else {
+
+                        Swal.fire({
+                            title: 'Não foi possivel realizar o cadastro',
+                            text: 'Fechando...',
+                            icon: 'warning',
+                            timer: 1500,
+                            buttons: false,
+                        })
+
+                    }
+
+                },
+                error: function (error) {
+                },
+                beforeSend: function () {
+                }
+            });
+
+
+
+        })
+
+
+       
+
+
+
+
+
+
+        //função para excluir turno cadastrada
+
+        $("#tbdata tbody").on("click", ".btn-eliminar", function () {
+
+            var filaSeleccionada = $(this).closest('tr');
+            var data = tabla.row(filaSeleccionada).data();
+           
+
+
+
+            Swal.fire({
+                title: 'Deseja excluir?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sim, Excluir',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+
+
+                if (result.isConfirmed) {
+                    jQuery.ajax({
+                        url: '@Url.Action("Exluir", "CadastroUsuario")?idUsuario=' + data.idUsuario,
+                        type: "DELETE",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        success: function (data) {
+                            console.log(data)
+                            if (data.respuesta) {
+                                tabla.ajax.reload();
+                            }
+                        },
+                        error: function (error) {
+                        },
+                        beforeSend: function () {
+                        }
+                    });
+                }
+
+            })
+
+
+            console.log(data);
+        })
+
+
+
+
+
+    </script>
+}
