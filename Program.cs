@@ -26,7 +26,7 @@ builder.Services.AddCors(options =>
 
 
 
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+// builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
